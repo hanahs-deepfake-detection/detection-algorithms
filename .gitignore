@@ -151,4 +151,4 @@ dmypy.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
 input/
-*.dat # ignore landmark dataset for dlib
+*.bz2
