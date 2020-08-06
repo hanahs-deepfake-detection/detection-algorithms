@@ -17,4 +17,4 @@ $ rm deepfake-detection-challenge.zip # unless you want to waste ~4GB disk space
 ```
 
 ### Dependencies
-Install these dependencies: (WIP)
+Install these dependencies:
