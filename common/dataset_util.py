@@ -30,6 +30,23 @@ class Dataset:
         """
         dataframe = pd.read_json(os.path.join(self.train_data, 'metadata.json'))
         return dataframe.T
+    
+    def get_video_path(self, filename: str, from_test_data=False):
+        """
+        Get path of a specified video file.
+
+        Params
+        ------
+        filename: str
+            The video file to get path.
+
+        from_test_data: bool
+            use video in test dataset if set. Default is False.
+        """
+        if from_test_data:
+            return os.path.join(self.test_data, filename)
+        else:
+            return os.path.join(self.train_data, filename)
 
     def get_frame_from_video(self, filename: str, frame_no: str,
                              from_test_data=False):
@@ -48,10 +65,7 @@ class Dataset:
         from_test_data: bool
             Use video in test dataset if set. Default is False.
         """
-        if from_test_data:
-            cap = cv.VideoCapture(os.path.join(self.test_data, filename))
-        else:
-            cap = cv.VideoCapture(os.path.join(self.train_data, filename))
+        cap = cv.VideoCapture(self.get_video_path(filename, from_test_data))
         total_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
         if frame_no < 0 or frame_no >= total_frames:
             raise IndexError(('Frame index %d out of range. '
