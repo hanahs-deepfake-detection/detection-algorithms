@@ -30,7 +30,7 @@ class Dataset:
         """
         dataframe = pd.read_json(os.path.join(self.train_data, 'metadata.json'))
         return dataframe.T
-    
+
     def get_video_path(self, filename: str, from_test_data=False):
         """
         Get path of a specified video file.
