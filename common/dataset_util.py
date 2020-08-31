@@ -75,9 +75,9 @@ class Dataset:
         _, current_frame = cap.read()
         return current_frame
 
-    def get_face_from_video(self, filename: str, frame_no: int,
-                            from_test_data=False,
-                            landmark_dataset='./face_landmark_dataset.dat'):
+    def get_face_coords(self, filename: str, frame_no: int,
+                        from_test_data=False,
+                        landmark_dataset='./face_landmark_dataset.dat'):
         """
         Get face region from video file's specified frame.
 
@@ -102,5 +102,4 @@ class Dataset:
         dlib_predictor = dlib.shape_predictor(landmark_dataset)
         # TODO: Support more than one face per frame
         face_rect = dlib_detector(frame, 1)[0]
-        return frame[face_rect.top():face_rect.bottom(),
-                     face_rect.left():face_rect.right()]
+        return face_rect
