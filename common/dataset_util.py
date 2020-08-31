@@ -48,7 +48,7 @@ class Dataset:
         else:
             return os.path.join(self.train_data, filename)
 
-    def get_frame_from_video(self, filename: str, frame_no: str,
+    def get_frame_from_video(self, filename: str, frame_no: int,
                              from_test_data=False):
         """
         Get specific frame from video file.
@@ -75,7 +75,7 @@ class Dataset:
         _, current_frame = cap.read()
         return current_frame
 
-    def get_face_from_video(self, filename: str, frame_no: str,
+    def get_face_from_video(self, filename: str, frame_no: int,
                             from_test_data=False,
                             landmark_dataset='./face_landmark_dataset.dat'):
         """
