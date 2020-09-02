@@ -115,7 +115,6 @@ class Dataset:
         frame = self.get_frame_from_video(filename, frame_no, from_test_data)
         dlib_detector = dlib.get_frontal_face_detector()
         # TODO: Use canonical path rather than current directory
-        dlib_predictor = dlib.shape_predictor(landmark_dataset)
         detection_result = dlib_detector(frame, 1)
         # TODO: Support more than one face per frame
         if not detection_result:
