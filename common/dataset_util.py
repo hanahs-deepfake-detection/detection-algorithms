@@ -101,11 +101,25 @@ class Dataset:
         landmark_dataset: str
             The face landmark dataset used in `dlib.shape_predictor`. Default
             value assumes that the dataset file is in current directory.
+
+        Return Type
+        -----------
+        ((y1: int, x1: int), (y2: int, x2: int))
+            The detected face region where (y1, x1) is the top-left corner of
+            the rectangle, and (y2, x2) is the bottom-right one.
+
+        Exceptions
+        ----------
+        Raises ValueError if face is not detected from the given frame.
         """
         frame = self.get_frame_from_video(filename, frame_no, from_test_data)
         dlib_detector = dlib.get_frontal_face_detector()
         # TODO: Use canonical path rather than current directory
         dlib_predictor = dlib.shape_predictor(landmark_dataset)
+        detection_result = dlib_detector(frame, 1)
         # TODO: Support more than one face per frame
-        face_rect = dlib_detector(frame, 1)[0]
-        return face_rect
+        if not detection_result:
+            raise ValueError('Cannot detect face from given frame')
+        rect = detection_result[0]
+        converted_rect = ((rect.top(), rect.left()), (rect.bottom(),rect.right()))
+        return converted_rect
