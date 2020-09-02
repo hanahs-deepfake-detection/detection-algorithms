@@ -3,8 +3,11 @@ dataset_util.py -- Deepfake dataset utility
 """
 
 import os
+from typing import Tuple
+
 import cv2 as cv
 import dlib
+import numpy as np
 import pandas as pd
 
 class Dataset:
@@ -24,14 +27,14 @@ class Dataset:
         self.train_data = os.path.join(self.root, 'train_sample_videos')
         self.test_data = os.path.join(self.root, 'test_videos')
 
-    def get_metadata_dataframe(self):
+    def get_metadata_dataframe(self) -> pd.DataFrame:
         """
         Get pandas dataframe from dataset's `metadata.json`.
         """
         dataframe = pd.read_json(os.path.join(self.train_data, 'metadata.json'))
         return dataframe.T
 
-    def get_video_path(self, filename: str, from_test_data=False):
+    def get_video_path(self, filename: str, from_test_data=False) -> str:
         """
         Get path of a specified video file.
 
@@ -49,7 +52,7 @@ class Dataset:
             return os.path.join(self.train_data, filename)
 
     def get_frame_from_video(self, filename: str, frame_no: int,
-                             from_test_data=False):
+                             from_test_data=False) -> np.ndarray:
         """
         Get specific frame from video file.
 
@@ -77,7 +80,10 @@ class Dataset:
 
     def get_face_coords(self, filename: str, frame_no: int,
                         from_test_data=False,
-                        landmark_dataset='./face_landmark_dataset.dat'):
+                        landmark_dataset='./face_landmark_dataset.dat') -> Tuple[
+                            Tuple[int, int],
+                            Tuple[int, int]
+                        ]:
         """
         Get face region from video file's specified frame.
 
