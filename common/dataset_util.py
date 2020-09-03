@@ -122,3 +122,27 @@ class Dataset:
         rect = detection_result[0]
         converted_rect = ((rect.top(), rect.left()), (rect.bottom(),rect.right()))
         return converted_rect
+
+    def crop_frame(self, filename: str, frame_no: int,
+                   region: Tuple[Tuple[int, int], Tuple[int, int]],
+                   from_test_data=False) -> np.ndarray:
+        """
+        Crop specified region from video file's specified frame.
+
+        Params
+        ------
+        filename: str
+            The video file to get frame and crop from.
+
+        frame_no: int
+            The specific frame index to get.
+
+        from_test_data: bool
+            Use video in test dataset if set. Default is False.
+
+        region: ((y1: int, x1: int), (y2: int, x2: int))
+            The region to crop. (y1, x1) is the top-left corner of the
+            rectangle, and (y2, x2) is the bottom-right one.
+        """
+        frame = self.get_frame_from_video(filename, frame, from_test_data)
+        return frame[region[0][0]:region[1][0], region[0][1]:region[1][1]]
