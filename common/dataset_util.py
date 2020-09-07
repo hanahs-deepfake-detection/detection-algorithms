@@ -14,9 +14,6 @@ class Dataset:
     """
     Dataset -- a class for accessing DFDC dataset
     """
-
-    """ㅣㄴㅇㄹㅣㄴㅇㄹㄴㅇㄴㅇㄴㅇㅓㄹㅓㄴㅁㅣㅇㄹㅓㄴㅣㅇㅓㄹㄴㅁㅓㄹㅓㅇㄴㅣㅓㄹㅣㅇㄴ"""
-    
     def __init__(self, dataset_root='../input/deepfake-detection-challenge'):
         """
         Initialize the Dataset class.
