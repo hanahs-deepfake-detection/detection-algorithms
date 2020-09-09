@@ -17,4 +17,10 @@ $ rm deepfake-detection-challenge.zip # unless you want to waste ~4GB disk space
 ```
 
 ### Dependencies
-Install these dependencies:
+Install dependencies with this `pip` command:
+
+```shell
+$ pip3 install dlib jupyterlab numpy opencv-python pandas
+```
+
+Some dependencies, like `dlib` require build tools.
