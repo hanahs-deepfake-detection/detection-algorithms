@@ -14,8 +14,7 @@ class Dataset:
     """
     Dataset -- a class for accessing DFDC dataset
     """
-    def __init__(self, dataset_root='../input/deepfake-detection-challenge',
-                 dataset_type='dfdc'):
+    def __init__(self, dataset_root='../input/deepfake-detection-challenge'):
         """
         Initialize the Dataset class.
 
@@ -23,40 +22,17 @@ class Dataset:
         ------
         dataset_root: str
             The root directory of DFDC dataset downloaded from Kaggle.
-
-        dataset_type: str
-            The dataset type. 'faceforensics' or 'dfdc'.
         """
         self.root = dataset_root
-        self.dataset_type = dataset_type
-
-        # Fall back to DFDC if dataset type is unknown
-        if self.dataset_type.lower() != 'faceforensics':
-            self.train_data = os.path.join(self.root, 'train_sample_videos')
-            self.test_data = os.path.join(self.root, 'test_videos')
-            self.metadata_dataframe = pd.read_json(
-                os.path.join(self.train_data, 'metadata.json')
-            ).T
-        else:
-            filenames = []
-            root_dirs = []
-            labels = []
-            for root, dirs, files in os.walk(self.root):
-                if not files:
-                    continue
-                filenames.extend(files)
-                root_dirs.extend([root] * len(files))
-                label = 'REAL' if 'original_sequences' in root else 'FAKE'
-                labels.extend([label] * len(files))
-            data = {'label': labels, 'root_dir': root_dirs}
-            self.metadata_dataframe = pd.DataFrame(data, index=filenames)
-
+        self.train_data = os.path.join(self.root, 'train_sample_videos')
+        self.test_data = os.path.join(self.root, 'test_videos')
 
     def get_metadata_dataframe(self) -> pd.DataFrame:
         """
         Get pandas dataframe from dataset's `metadata.json`.
         """
-        return self.metadata_dataframe
+        dataframe = pd.read_json(os.path.join(self.train_data, 'metadata.json'))
+        return dataframe.T
 
     def get_video_path(self, filename: str, from_test_data=False) -> str:
         """
@@ -70,16 +46,10 @@ class Dataset:
         from_test_data: bool
             use video in test dataset if set. Default is False.
         """
-        if self.dataset_type.lower() != 'faceforensics':
-            if from_test_data:
-                return os.path.join(self.test_data, filename)
-            else:
-                return os.path.join(self.train_data, filename)
+        if from_test_data:
+            return os.path.join(self.test_data, filename)
         else:
-            return os.path.join(
-                self.metadata_dataframe.loc[filename]['root_dir'],
-                filename
-            )
+            return os.path.join(self.train_data, filename)
 
     def get_frame_from_video(self, filename: str, frame_no: int,
                              from_test_data=False) -> np.ndarray:
