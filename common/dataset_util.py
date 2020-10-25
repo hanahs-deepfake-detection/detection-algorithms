@@ -151,6 +151,8 @@ class Dataset:
             raise ValueError('Cannot detect face from given frame')
         rect = detection_result[0]
         converted_rect = ((rect.top(), rect.left()), (rect.bottom(),rect.right()))
+        converted_rect = tuple(tuple(map(lambda x: max(0, x), coord))
+                               for coord in converted_rect)
         return converted_rect
 
     def crop_frame(self, filename: str, frame_no: int,
