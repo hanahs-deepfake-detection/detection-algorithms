@@ -24,7 +24,7 @@ model.compile(loss='binary_crossentropy', optimizer=keras.optimizers.Adam())
 model.summary()
 
 input_file = np.load(argv[1])
-inputs = input_file.f.arr_1
+inputs = input_file.f.arr_0
 labels = np.load(argv[2])
 
 epochs = 200
