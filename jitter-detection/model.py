@@ -33,6 +33,7 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
                                                       histogram_freq=1)
 tf.debugging.set_log_device_placement(True)
 
-model.fit(inputs, labels, batch_size=10, epochs=epochs, validation_split=0.2,
-          callbacks=[tensorboard_callback])
+with tf.device('/GPU:0'):
+    model.fit(inputs, labels, batch_size=10, epochs=epochs,
+              validation_split=0.2, callbacks=[tensorboard_callback])
 model.save('resnet_cnn_detector_model')
