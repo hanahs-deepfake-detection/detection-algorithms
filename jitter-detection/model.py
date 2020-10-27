@@ -20,7 +20,7 @@ model = keras.Sequential([
     keras.layers.LSTM(64),
     keras.layers.Dense(1)
 ])
-model.compile(loss='binary_crossentropy', optimizer=keras.optimizers.Adam())
+model.compile(loss='binary_crossentropy', optimizer='adadelta')
 model.summary()
 
 input_file = np.load(argv[1])
