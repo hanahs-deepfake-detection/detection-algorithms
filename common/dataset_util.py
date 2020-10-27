@@ -38,18 +38,18 @@ class Dataset:
                 os.path.join(self.train_data, 'metadata.json')
             ).T
         else:
-            filenames = []
-            root_dirs = []
+            file_path = []
             labels = []
+            indicies = []
             for root, dirs, files in os.walk(self.root):
                 if not files:
                     continue
-                filenames.extend(files)
-                root_dirs.extend([root] * len(files))
+                indicies.extend([os.path.join(root, file) for file in files])
+                file_path.extend([os.path.join(root, file) for file in files])
                 label = 'REAL' if 'original_sequences' in root else 'FAKE'
                 labels.extend([label] * len(files))
-            data = {'label': labels, 'root_dir': root_dirs}
-            self.metadata_dataframe = pd.DataFrame(data, index=filenames)
+            data = {'label': labels, 'file_path': file_path}
+            self.metadata_dataframe = pd.DataFrame(data, index=indicies)
 
 
     def get_metadata_dataframe(self) -> pd.DataFrame:
@@ -76,10 +76,7 @@ class Dataset:
             else:
                 return os.path.join(self.train_data, filename)
         else:
-            return os.path.join(
-                self.metadata_dataframe.loc[filename]['root_dir'],
-                filename
-            )
+            return self.metadata_dataframe.loc[filename]['file_path']
 
     def get_frame_from_video(self, filename: str, frame_no: int,
                              from_test_data=False) -> np.ndarray:
