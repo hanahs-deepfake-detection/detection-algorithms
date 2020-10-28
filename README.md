@@ -6,6 +6,8 @@ Deepfake detection algorithm zoo.
 ## Project Setup
 
 ### Dataset
+
+#### DFDC
 Download [data from DFDC](https://www.kaggle.com/c/deepfake-detection-challenge) to `dataset` directory.
 
 ```shell
@@ -15,6 +17,17 @@ $ kaggle competitions download deepfake-detection-challenge
 $ unzip deepfake-detection-challenge.zip
 $ rm deepfake-detection-challenge.zip # unless you want to waste ~4GB disk space
 ```
+
+#### FaceForensics
+Refer to the [download instructions](https://github.com/ondyari/FaceForensics/blob/master/dataset/README.md) by FaceForensics.
+
+```shell
+$ mkdir -p input/faceforensics
+$ cd input/faceforensics
+$ python $(faceforensics-download-script) .
+```
+
+Replace `$(faceforensics-download-script)` to the actual path of the script.
 
 ### Dependencies
 Install dependencies with this `pip` command:
