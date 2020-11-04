@@ -23,28 +23,35 @@ class STN(keras.Model):
         super(STN, self).__init__()
 
     def build(self, input_shape):
+        batch_count = input_shape[0]
+        height = input_shape[1]
+        width = input_shape[2]
         self.flatten = keras.layers.Flatten()
-        self.dense1 = keras.layers.Dense(64, activation='relu',
-                                         kernel_initializer='he_uniform')
-        self.dropout = keras.layers.Dropout(0.5)
-        self.dense2 = keras.layers.Dense(6, activation='relu',
-                                         kernel_initializer='he_uniform')
-        self.theta = self.add_weight(
-            shape=(input_shape[0], 6), initializer='random_normal'
+        self.dropout1 = keras.layers.Dropout(rate=0.5)
+        self.dropout2 = keras.layers.Dropout(rate=0.5)
+        self.w_fc1 = self.add_weight(shape=(height * width, 64))
+        self.b_fc1 = self.add_weight(shape=(64,))
+        self.w_fc2 = self.add_weight(shape=(64, 6))
+        self.b_fc2 = self.add_weight(
+            shape=(6,),
+            initializer=lambda input_shape, dtype=None: tf.constant(
+                [1, 0, 0, 0, 1, 0], tf.float32
+            )
         )
 
     def call(self, inputs):
         x = self.flatten(inputs)
-        x = self.dense1(x)
-        x = self.dropout(x)
-        x = self.dense2(x)
-        mat = self.theta * tf.reshape(x, (-1, 6))
+        x = tf.matmul(x, self.w_fc1) + self.b_fc1
+        x = tf.tanh(x)
+        x = self.dropout1(x)
+        x = tf.matmul(x, self.w_fc2) + self.b_fc2
+        x = tf.tanh(x)
+        x = self.dropout2(x)
+        x = tf.reshape(x, (-1, 2, 3))
 
-        batch_count = inputs.shape[0]
         input_height = inputs.shape[1]
         input_width = inputs.shape[2]
-        mat = tf.reshape(mat, (batch_count, 2, 3))
-        batch_grid = gen_sampling_grid(input_height, input_width, mat)
+        batch_grid = gen_sampling_grid(input_height, input_width, x)
         x_s = batch_grid[:,0,:,:]
         y_s = batch_grid[:,1,:,:]
         return bilinear_sampler(inputs, x_s, y_s)
