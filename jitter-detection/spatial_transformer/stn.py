@@ -50,10 +50,7 @@ class STN(keras.Model):
         )
 
     def compute_output_shape(self, input_shape):
-        return (
-            input_shape[0], self.output_height,
-            self.output_width, input_shape[-1]
-        )
+        return self.out_shape
 
     def call(self, inputs):
         x = self.conv1(inputs)
