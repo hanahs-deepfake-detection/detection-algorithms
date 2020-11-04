@@ -19,13 +19,18 @@ class STN(keras.Model):
     """
     STN module implementation.
     """
-    def __init__(self):
+    def __init__(self, output_shape=None):
         super(STN, self).__init__()
+        self.out_shape = output_shape
+        if self.out_shape is not None:
+            self.output_height = self.out_shape[1]
+            self.output_width = self.out_shape[2]
 
     def build(self, input_shape):
         batch_count = input_shape[0]
-        height = input_shape[1]
-        width = input_shape[2]
+        if self.out_shape is None:
+            self.output_height = input_shape[1]
+            self.output_width = input_shape[2]
         self.conv1 = keras.layers.Conv2D(activation='relu', padding='same',
                                          filters=32, kernel_size=(5, 5))
         self.maxpool1 = keras.layers.MaxPool2D()
@@ -44,6 +49,12 @@ class STN(keras.Model):
             )
         )
 
+    def compute_output_shape(self, input_shape):
+        return (
+            input_shape[0], self.output_height,
+            self.output_width, input_shape[-1]
+        )
+
     def call(self, inputs):
         x = self.conv1(inputs)
         x = self.maxpool1(x)
@@ -54,10 +65,9 @@ class STN(keras.Model):
         x = self.dropout(x)
         x = self.dense2(x)
 
-        input_height = inputs.shape[1]
-        input_width = inputs.shape[2]
         x = tf.reshape(x, (-1, 2, 3))
-        batch_grid = gen_sampling_grid(input_height, input_width, x)
+        batch_grid = gen_sampling_grid(self.output_height,
+                                       self.output_width, x)
         x_s = batch_grid[:,0,:,:]
         y_s = batch_grid[:,1,:,:]
         return bilinear_sampler(inputs, x_s, y_s)
