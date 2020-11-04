@@ -26,31 +26,37 @@ class STN(keras.Model):
         batch_count = input_shape[0]
         height = input_shape[1]
         width = input_shape[2]
+        self.conv1 = keras.layers.Conv2D(activation='relu', padding='same',
+                                         filters=32, kernel_size=(5, 5))
+        self.maxpool1 = keras.layers.MaxPool2D()
+        self.conv2 = keras.layers.Conv2D(activation='relu', padding='same',
+                                         filters=32, kernel_size=(5, 5))
+        self.maxpool2 = keras.layers.MaxPool2D()
         self.flatten = keras.layers.Flatten()
-        self.dropout1 = keras.layers.Dropout(rate=0.5)
-        self.dropout2 = keras.layers.Dropout(rate=0.5)
-        self.w_fc1 = self.add_weight(shape=(height * width, 64))
-        self.b_fc1 = self.add_weight(shape=(64,))
-        self.w_fc2 = self.add_weight(shape=(64, 6))
-        self.b_fc2 = self.add_weight(
-            shape=(6,),
-            initializer=lambda input_shape, dtype=None: tf.constant(
+        self.dense1 = keras.layers.Dense(
+            64, activation='tanh', kernel_initializer='zeros'
+        )
+        self.dropout = keras.layers.Dropout(0.5)
+        self.dense2 = keras.layers.Dense(
+            6, activation='tanh', kernel_initializer='zeros',
+            bias_initializer=lambda shape, dtype=None: tf.constant(
                 [1, 0, 0, 0, 1, 0], tf.float32
             )
         )
 
     def call(self, inputs):
+        x = self.conv1(inputs)
+        x = self.maxpool1(x)
+        x = self.conv2(x)
+        x = self.maxpool2(x)
         x = self.flatten(inputs)
-        x = tf.matmul(x, self.w_fc1) + self.b_fc1
-        x = tf.tanh(x)
-        x = self.dropout1(x)
-        x = tf.matmul(x, self.w_fc2) + self.b_fc2
-        x = tf.tanh(x)
-        x = self.dropout2(x)
-        x = tf.reshape(x, (-1, 2, 3))
+        x = self.dense1(x)
+        x = self.dropout(x)
+        x = self.dense2(x)
 
         input_height = inputs.shape[1]
         input_width = inputs.shape[2]
+        x = tf.reshape(x, (-1, 2, 3))
         batch_grid = gen_sampling_grid(input_height, input_width, x)
         x_s = batch_grid[:,0,:,:]
         y_s = batch_grid[:,1,:,:]
