@@ -28,6 +28,8 @@ class STN(keras.Model):
 
     def build(self, input_shape):
         batch_count = input_shape[0]
+        self.input_height = input_shape[1]
+        self.input_width = input_shape[2]
         if self.out_shape is None:
             self.output_height = input_shape[1]
             self.output_width = input_shape[2]
@@ -63,8 +65,7 @@ class STN(keras.Model):
         x = self.dense2(x)
 
         x = tf.reshape(x, (-1, 2, 3))
-        batch_grid = gen_sampling_grid(self.output_height,
-                                       self.output_width, x)
+        batch_grid = gen_sampling_grid(self.input_height, self.input_width, x)
         x_s = batch_grid[:,0,:,:]
         y_s = batch_grid[:,1,:,:]
         return bilinear_sampler(inputs, x_s, y_s)
