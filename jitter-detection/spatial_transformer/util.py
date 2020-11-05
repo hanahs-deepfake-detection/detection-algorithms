@@ -54,7 +54,7 @@ def get_pixel_value(image: tf.Tensor, x: tf.Tensor, y: tf.Tensor):
         Batch of images in shape (batch_count, height, width, channels).
 
     x: tf.Tensor
-        Flattened tensor of shape (batch_count * height * width,).
+        Tensor of shape (batch_count, height, width,).
 
     y: tf.Tensor
         Tensor with same shape as x.
@@ -63,9 +63,9 @@ def get_pixel_value(image: tf.Tensor, x: tf.Tensor, y: tf.Tensor):
     -----------
     tf.Tensor of shape (batch_count, height, width, channels)
     """
-    batch_count = image.shape[0]
-    height = image.shape[1]
-    width = image.shape[2]
+    batch_count = x.shape[0]
+    height = x.shape[1]
+    width = x.shape[2]
     batch_index = tf.reshape(tf.range(0, batch_count), (batch_count, 1, 1))
     b = tf.tile(batch_index, (1, height, width))
     indices = tf.stack((b, y, x), 3)
