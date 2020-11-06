@@ -49,7 +49,11 @@ class VideoSequence(keras.utils.Sequence):
             video = np.empty(batch.shape[1:], np.dtype('uint8'))
             for frame in range(self.video_frames):
                 _, current_frame = cap.read()
-                video[frame] = cv.resize(current_frame, (1024, 768))
+                current_frame = cv.resize(current_frame, (1024, 768))
+                current_frame = cv.cvtColor(current_frame, cv.COLOR_BGR2RGB)
+                current_frame = current_frame.astype(np.dtype('float32'))
+                current_frame /= 255.0
+                video[frame] = current_frame
             cap.release()
             batch[i] = video
             labels[i] = float(self.dataset_df.loc[filename]['label'] == 'FAKE')
