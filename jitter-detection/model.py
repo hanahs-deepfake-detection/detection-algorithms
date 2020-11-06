@@ -101,10 +101,10 @@ valid_files = list(valid_file_set)
 train_data_gen = VideoSequence(train_files)
 valid_data_gen = VideoSequence(valid_files)
 
-checkpoint_path = 'training_checkpoints/cp.ckpt'
-checkpoint_dir = os.path.dirname(checkpoint_path)
-checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                      save_weights_only=True,
+checkpoint_callback = keras.callbacks.ModelCheckpoint('best_model.hdf5',
+                                                      monitor='loss',
+                                                      save_best_only=True,
+                                                      mode='auto',
                                                       verbose=1)
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir='./logs')
 model.fit(train_data_gen, epochs=100, validation_data=valid_data_gen,
