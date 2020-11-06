@@ -14,24 +14,18 @@ class BilinearSampler(keras.layers.Layer):
     """
     Bilinear sampler.
     """
-    def __init__(self, output_shape=None):
+    def __init__(self, input_shape, output_shape):
         super(BilinearSampler, self).__init__()
         self.out_shape = output_shape
-        if self.out_shape is not None:
-            self.output_height = self.out_shape[1]
-            self.output_width = self.out_shape[2]
-
-    def build(self, input_shape):
-        image_shape = input_shape[1]
-        batch_count = image_shape[0]
-        self.input_height = image_shape[1]
-        self.input_width = image_shape[2]
-        if self.out_shape is None:
-            self.output_height = image_shape[1]
-            self.output_width = image_shape[2]
+        self.output_height = self.out_shape[1]
+        self.output_width = self.out_shape[2]
+        self.in_shape = input_shape
+        self.input_height = input_shape[0]
+        self.input_width = input_shape[1]
 
     def call(self, inputs):
-        theta, image = inputs
+        theta = inputs[:,:6]
+        image = tf.reshape(inputs[:,6:], self.in_shape)
         theta = tf.reshape(theta, (-1, 2, 3))
         batch_grid = gen_sampling_grid(self.input_height,
                                        self.input_width, theta)
