@@ -106,5 +106,6 @@ checkpoint_dir = os.path.dirname(checkpoint_path)
 checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                       save_weights_only=True,
                                                       verbose=1)
+tensorboard_callback = keras.callbacks.TensorBoard(log_dir='./logs')
 model.fit(train_data_gen, epochs=100, validation_data=valid_data_gen,
-          callbacks=[checkpoint_callback])
+          callbacks=[checkpoint_callback, tensorboard_callback])
