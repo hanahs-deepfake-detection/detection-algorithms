@@ -22,9 +22,9 @@ sys.path.append('../common/')
 from spatial_transformer.bilinear_sampler import BilinearSampler
 import dataset_util
 
-dataset_dir = '/run/media/curling_grad/LACIE/faceforensics-dataset'
-batch_size = 1
-video_frames = 10
+dataset_dir = sys.argv[1]
+batch_size = int(sys.argv[2])
+video_frames = int(sys.argv[3]) 
 class VideoSequence(keras.utils.Sequence):
     def __init__(self, filename_list):
         self.batch_size = batch_size 
