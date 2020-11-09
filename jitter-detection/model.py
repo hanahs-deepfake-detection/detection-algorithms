@@ -29,8 +29,8 @@ class VideoSequence(keras.utils.Sequence):
     def __init__(self, filename_list):
         self.batch_size = batch_size 
         self.video_frames = video_frames
-        self.video_height = 768
-        self.video_width = 1024
+        self.video_height = 384
+        self.video_width = 512
         self.dataset = dataset_util.Dataset(dataset_dir, 'faceforensics')
         self.dataset_df = self.dataset.get_metadata_dataframe()
         self.filename_list = filename_list
@@ -49,7 +49,10 @@ class VideoSequence(keras.utils.Sequence):
             video = np.empty(batch.shape[1:], np.dtype('uint8'))
             for frame in range(self.video_frames):
                 _, current_frame = cap.read()
-                current_frame = cv.resize(current_frame, (1024, 768))
+                current_frame = cv.resize(
+                    current_frame,
+                    (self.video_width, self.video_height)
+                )
                 current_frame = cv.cvtColor(current_frame, cv.COLOR_BGR2RGB)
                 current_frame = current_frame.astype(np.dtype('float32'))
                 current_frame /= 255.0
@@ -62,7 +65,7 @@ class VideoSequence(keras.utils.Sequence):
     def __len__(self):
         return len(self.filename_list)
 
-inputs = keras.Input((video_frames, 768, 1024, 3), batch_size=batch_size)
+inputs = keras.Input((video_frames, 384, 512, 3), batch_size=batch_size)
 x = TimeDistributed(Conv2D(32, kernel_size=(3, 3), activation='relu'))(inputs)
 x = TimeDistributed(MaxPool2D())(x)
 x = TimeDistributed(Conv2D(32, kernel_size=(3, 3), activation='relu'))(x)
@@ -76,7 +79,7 @@ x = TimeDistributed(Dense(6, activation='tanh', kernel_initializer='zeros',
                     )))(x)
 x = Lambda(lambda ls: tf.concat([ls[0], tf.reshape(ls[1],
            (batch_size, video_frames, -1))], -1))([x, inputs])
-x = TimeDistributed(BilinearSampler(input_shape=(batch_size, 768, 1024, 3),
+x = TimeDistributed(BilinearSampler(input_shape=(batch_size, 384, 512, 3),
                     output_shape=(batch_size, 224, 224, 3)))(x)
 resnet = ResNet101V2(include_top=False, weights=None)
 x = TimeDistributed(resnet)(x)
@@ -85,7 +88,7 @@ x = LSTM(32, return_sequences=True)(x)
 x = LSTM(32)(x)
 x = Dense(10, activation='relu')(x)
 x = BatchNormalization()(x)
-x = Dense(1, activation='softmax')(x)
+x = Dense(1, activation='sigmoid')(x)
 model = keras.Model(inputs=inputs, outputs=x)
 model.compile(loss='mse', optimizer='rmsprop', metrics=['accuracy'])
 model.summary()
@@ -101,9 +104,9 @@ valid_files = list(valid_file_set)
 train_data_gen = VideoSequence(train_files)
 valid_data_gen = VideoSequence(valid_files)
 
-checkpoint_callback = keras.callbacks.ModelCheckpoint('best_model.hdf5',
+checkpoint_callback = keras.callbacks.ModelCheckpoint('best_model',
                                                       monitor='loss',
-                                                      save_best_only=True,
+                                                      save_weights_only=True,
                                                       mode='auto',
                                                       verbose=1)
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir='./logs')
