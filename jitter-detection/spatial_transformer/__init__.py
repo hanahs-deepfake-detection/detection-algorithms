@@ -1,2 +1,2 @@
-from . import stn
 from . import util
+from . import bilinear_sampler
