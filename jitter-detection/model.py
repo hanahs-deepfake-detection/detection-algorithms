@@ -19,51 +19,13 @@ import sys
 import tensorflow as tf
 
 sys.path.append('../common/')
+from data_pipeline import VideoPipeline
 from spatial_transformer.bilinear_sampler import BilinearSampler
 import dataset_util
 
 dataset_dir = sys.argv[1]
 batch_size = int(sys.argv[2])
 video_frames = int(sys.argv[3]) 
-class VideoSequence(keras.utils.Sequence):
-    def __init__(self, filename_list):
-        self.batch_size = batch_size 
-        self.video_frames = video_frames
-        self.video_height = 384
-        self.video_width = 512
-        self.dataset = dataset_util.Dataset(dataset_dir, 'faceforensics')
-        self.dataset_df = self.dataset.get_metadata_dataframe()
-        self.filename_list = filename_list
-
-    def __getitem__(self, index):
-        filenames = self.filename_list[index * self.batch_size
-                                      :(index + 1) * self.batch_size]
-        batch = np.empty((self.batch_size, self.video_frames,
-                          self.video_height, self.video_width, 3),
-                         np.dtype('uint8'))
-        labels = np.empty((self.batch_size,), np.dtype('float32'))
-        for i, filename in enumerate(filenames):
-            cap = cv.VideoCapture(filename)
-            frame_count = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
-            assert frame_count >= self.video_frames
-            video = np.empty(batch.shape[1:], np.dtype('uint8'))
-            for frame in range(self.video_frames):
-                _, current_frame = cap.read()
-                current_frame = cv.resize(
-                    current_frame,
-                    (self.video_width, self.video_height)
-                )
-                current_frame = cv.cvtColor(current_frame, cv.COLOR_BGR2RGB)
-                current_frame = current_frame.astype(np.dtype('float32'))
-                current_frame /= 255.0
-                video[frame] = current_frame
-            cap.release()
-            batch[i] = video
-            labels[i] = float(self.dataset_df.loc[filename]['label'] == 'FAKE')
-        return batch, labels
-
-    def __len__(self):
-        return len(self.filename_list)
 
 inputs = keras.Input((video_frames, 384, 512, 3), batch_size=batch_size)
 x = TimeDistributed(Conv2D(32, kernel_size=(3, 3), activation='relu'))(inputs)
@@ -101,8 +63,8 @@ train_files = sample(filenames, int(sys.argv[4]))
 train_file_set = set(train_files)
 valid_file_set = file_set - train_file_set
 valid_files = list(valid_file_set)
-train_data_gen = VideoSequence(train_files)
-valid_data_gen = VideoSequence(valid_files)
+train_data_gen = VideoPipeline(dataset_dir, train_files)
+valid_data_gen = VideoPipeline(dataset_dir, valid_files)
 
 checkpoint_callback = keras.callbacks.ModelCheckpoint('best_model',
                                                       monitor='loss',
