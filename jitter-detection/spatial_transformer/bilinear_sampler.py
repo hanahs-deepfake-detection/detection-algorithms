@@ -20,8 +20,8 @@ class BilinearSampler(keras.layers.Layer):
         self.output_height = self.out_shape[1]
         self.output_width = self.out_shape[2]
         self.in_shape = input_shape
-        self.input_height = input_shape[0]
-        self.input_width = input_shape[1]
+        self.input_height = input_shape[1]
+        self.input_width = input_shape[2]
 
     def call(self, inputs):
         theta = inputs[:,:6]
