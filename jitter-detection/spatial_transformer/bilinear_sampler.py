@@ -32,3 +32,9 @@ class BilinearSampler(keras.layers.Layer):
         x_s = batch_grid[:,0,:,:]
         y_s = batch_grid[:,1,:,:]
         return bilinear_sampler(image, x_s, y_s)
+
+    def get_config(self):
+        config = super(BilinearSampler, self).get_config()
+        config.update({'input_shape': self.in_shape})
+        config.update({'output_shape': self.out_shape})
+        return config
