@@ -1,3 +1,6 @@
+from random import shuffle
+from tensorflow import keras
+
 import cv2 as cv
 import numpy as np
 import sys
@@ -5,41 +8,49 @@ sys.path.append('../common')
 import dataset_util
 
 class VideoPipeline(keras.utils.Sequence):
-    def __init__(self, dataset_dir, filename_list):
-        self.batch_size = batch_size 
+    def __init__(self, dataset_dir, batch_size, video_frames, shuffle_data=True,
+                 video_height=384, video_width=512):
+        self.batch_size = batch_size
         self.video_frames = video_frames
-        self.video_height = 384
-        self.video_width = 512
+        self.video_height = video_height
+        self.video_width = video_width
         self.dataset = dataset_util.Dataset(dataset_dir, 'faceforensics')
         self.dataset_df = self.dataset.get_metadata_dataframe()
-        self.filename_list = filename_list
-
-    def __getitem__(self, index):
-        filenames = self.filename_list[index * self.batch_size
-                                      :(index + 1) * self.batch_size]
-        batch = np.empty((self.batch_size, self.video_frames,
-                          self.video_height, self.video_width, 3),
-                         np.dtype('uint8'))
-        labels = np.empty((self.batch_size,), np.dtype('float32'))
-        for i, filename in enumerate(filenames):
+        self.filename_list = self.dataset_df.index.to_list()
+        self.chunkspec = []
+        for filename in self.filename_list:
             cap = cv.VideoCapture(filename)
             frame_count = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
-            assert frame_count >= self.video_frames
-            video = np.empty(batch.shape[1:], np.dtype('uint8'))
+            chunk_count = frame_count // self.video_frames
+            self.chunkspec.extend([(filename, x * self.video_frames)
+                                   for x in range(chunk_count)])
+            cap.release()
+        self.total_batches = len(self.chunkspec) // \
+                             self.batch_size * self.batch_size
+        if shuffle_data:
+            shuffle(self.chunkspec)
+
+    def __getitem__(self, index):
+        batch = np.empty((self.batch_size, self.video_frames,
+                          self.video_height, self.video_width, 3),
+                         np.dtype('float32'))
+        labels = np.empty((self.batch_size,), np.dtype('float32'))
+        for i, (filename, start_frame) in enumerate(
+            self.chunkspec[index:index + self.batch_size]):
+            cap = cv.VideoCapture(filename)
+            cap.set(cv.CAP_PROP_POS_FRAMES, start_frame)
+            video = np.empty(batch.shape[1:], 'uint8')
             for frame in range(self.video_frames):
                 _, current_frame = cap.read()
                 current_frame = cv.resize(
-                    current_frame,
-                    (self.video_width, self.video_height)
+                    current_frame, (self.video_width, self.video_height)
                 )
                 current_frame = cv.cvtColor(current_frame, cv.COLOR_BGR2RGB)
-                current_frame = current_frame.astype(np.dtype('float32'))
-                current_frame /= 255.0
                 video[frame] = current_frame
             cap.release()
-            batch[i] = video
-            labels[i] = float(self.dataset_df.loc[filename]['label'] == 'FAKE')
+            batch[i] = video.astype('float32') / 255
+            labels[i] = float(self.dataset_df.loc[filename]['label'] == 'REAL')
         return batch, labels
 
     def __len__(self):
-        return len(self.filename_list)
+        return self.total_batches
