@@ -14,3 +14,4 @@ path.append(os.path.join(project_root, 'common'))
 
 import dataset_util
 import spatial_transformer
+import data_pipeline
