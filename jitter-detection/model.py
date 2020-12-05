@@ -25,7 +25,7 @@ from spatial_transformer.bilinear_sampler import BilinearSampler
 
 dataset_dir = sys.argv[1]
 batch_size = int(sys.argv[2])
-video_frames = int(sys.argv[3]) 
+video_frames = int(sys.argv[3])
 
 inputs = keras.Input((video_frames, 384, 512, 3), batch_size=batch_size)
 x = TimeDistributed(Conv2D(32, kernel_size=(3, 3), activation='relu'))(inputs)
@@ -73,5 +73,6 @@ checkpoint_callback = keras.callbacks.ModelCheckpoint('best_model',
                                                       mode='auto',
                                                       verbose=1)
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir='./logs')
-model.fit(train_data_gen, epochs=100, validation_data=valid_data_gen,
-          callbacks=[checkpoint_callback, tensorboard_callback])
+with tf.device(sys.argv[5]):
+    model.fit(train_data_gen, epochs=100, validation_data=valid_data_gen,
+              callbacks=[checkpoint_callback, tensorboard_callback])
