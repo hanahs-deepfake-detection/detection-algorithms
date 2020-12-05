@@ -19,9 +19,9 @@ import sys
 import tensorflow as tf
 
 sys.path.append('../common/')
+import dataset_util
 from data_pipeline import VideoPipeline
 from spatial_transformer.bilinear_sampler import BilinearSampler
-import dataset_util
 
 dataset_dir = sys.argv[1]
 batch_size = int(sys.argv[2])
@@ -58,13 +58,14 @@ model.summary()
 dataset = dataset_util.Dataset(dataset_dir, 'faceforensics')
 dataset_df = dataset.get_metadata_dataframe()
 filenames = dataset_df.index.to_list()
+labels = dataset_df['label'].to_dict()
 file_set = set(filenames)
 train_files = sample(filenames, int(sys.argv[4]))
 train_file_set = set(train_files)
 valid_file_set = file_set - train_file_set
 valid_files = list(valid_file_set)
-train_data_gen = VideoPipeline(dataset_dir, train_files)
-valid_data_gen = VideoPipeline(dataset_dir, valid_files)
+train_data_gen = VideoPipeline(train_files, labels, batch_size, video_frames)
+valid_data_gen = VideoPipeline(valid_files, labels, batch_size, video_frames)
 
 checkpoint_callback = keras.callbacks.ModelCheckpoint('best_model',
                                                       monitor='loss',

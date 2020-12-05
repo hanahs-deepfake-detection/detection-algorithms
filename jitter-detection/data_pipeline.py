@@ -4,21 +4,18 @@ from tensorflow import keras
 import cv2 as cv
 import numpy as np
 import sys
-sys.path.append('../common')
-import dataset_util
 
 class VideoPipeline(keras.utils.Sequence):
-    def __init__(self, dataset_dir, batch_size, video_frames, shuffle_data=True,
-                 video_height=384, video_width=512):
+    def __init__(self, filenames, labels, batch_size, video_frames,
+                 shuffle_data=True, video_height=384, video_width=512):
         self.batch_size = batch_size
         self.video_frames = video_frames
         self.video_height = video_height
         self.video_width = video_width
-        self.dataset = dataset_util.Dataset(dataset_dir, 'faceforensics')
-        self.dataset_df = self.dataset.get_metadata_dataframe()
-        self.filename_list = self.dataset_df.index.to_list()
+        self.labels = labels
+        self.filenames = filenames
         self.chunkspec = []
-        for filename in self.filename_list:
+        for filename in self.filenames:
             cap = cv.VideoCapture(filename)
             frame_count = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
             chunk_count = frame_count // self.video_frames
@@ -49,7 +46,7 @@ class VideoPipeline(keras.utils.Sequence):
                 video[frame] = current_frame
             cap.release()
             batch[i] = video.astype('float32') / 255
-            labels[i] = float(self.dataset_df.loc[filename]['label'] == 'REAL')
+            labels[i] = float(self.labels[filename] == 'REAL')
         return batch, labels
 
     def __len__(self):
