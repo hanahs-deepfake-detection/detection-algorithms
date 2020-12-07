@@ -11,7 +11,7 @@ import os
 import pandas as pd
 
 from sys import argv
-from dataset_util import Dataset
+from .dataset_util import Dataset
 
 FACE_SIZE = 224
 INFO = f'{colorama.Fore.BLUE}INFO{colorama.Style.RESET_ALL}:'
