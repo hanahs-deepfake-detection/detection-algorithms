@@ -46,8 +46,10 @@ def predict(model, input_video_path, video_frames=10,
     average_output = output_total / actual_model_runs
     print_fn(f'{model_runs} model runs. Average model output: {average_output}')
     if average_output > threshold:
-        verdict = f'{colorama.Fore.RED}FAKE'
+        verdict_str = f'{colorama.Fore.RED}FAKE'
+        verdict = True
     else:
-        verdict = f'{colorama.Fore.GREEN}REAL'
-    print_fn(f'Verdict: {verdict}{colorama.Style.RESET_ALL}')
-    return verdict[:-4] == 'FAKE', average_output
+        verdict_str = f'{colorama.Fore.GREEN}REAL'
+        verdict = False
+    print_fn(f'Verdict: {verdict_str}{colorama.Style.RESET_ALL}')
+    return verdict, average_output
