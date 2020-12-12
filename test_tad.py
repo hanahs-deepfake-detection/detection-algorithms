@@ -41,7 +41,7 @@ try:
                              use_gpu_for_face=use_gpu)
         ground_truth = int(labels[file] == 'FAKE')
         confusion_matrix[ground_truth][int(verdict)] += 1
-        f.write(f'{verdict}, {output}\n')
+        f.write(f'{file}, {verdict}, {output}\n')
 except KeyboardInterrupt:
     print(confusion_matrix)
 
