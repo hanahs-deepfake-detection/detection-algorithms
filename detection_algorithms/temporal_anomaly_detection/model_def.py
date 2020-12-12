@@ -10,7 +10,7 @@ from tensorflow.keras.layers import (
 )
 
 import tensorflow as tf
-from . import spatial_transformer
+from .spatial_transformer.bilinear_sampler import BilinearSampler
 
 def gen_model(batch_size, video_frames):
     inputs = keras.Input((video_frames, 384, 512, 3), batch_size=batch_size)
@@ -27,7 +27,7 @@ def gen_model(batch_size, video_frames):
                         )))(x)
     x = Lambda(lambda ls: tf.concat([ls[0], tf.reshape(ls[1],
                (batch_size, video_frames, -1))], -1))([x, inputs])
-    x = TimeDistributed(spatial_transformer.BilinearSampler(input_shape=(batch_size, 384, 512, 3),
+    x = TimeDistributed(BilinearSampler(input_shape=(batch_size, 384, 512, 3),
                         output_shape=(batch_size, 224, 224, 3)))(x)
     resnet = ResNet101V2(include_top=False, weights=None)
     x = TimeDistributed(resnet)(x)
