@@ -33,14 +33,17 @@ model.load_weights(model_file).expect_partial()
 
 model_runs = 0
 confusion_matrix = np.zeros((2, 2), 'int32')
+f = open('log.txt', 'a')
 try:
     for file in files:
         print(f'[{model_runs}] Running model for file {file}')
-        verdict, _ = predict(model, file, video_frames=frame_count,
+        verdict, output = predict(model, file, video_frames=frame_count,
                              use_gpu_for_face=use_gpu)
         ground_truth = int(labels[file] == 'FAKE')
         confusion_matrix[ground_truth][int(verdict)] += 1
+        f.write(f'{verdict}, {output}\n')
 except KeyboardInterrupt:
     print(confusion_matrix)
 
+f.close()
 print(confusion_matrix)
