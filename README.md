@@ -1,5 +1,3 @@
-> Do you wanna have a bad time?
-
 # detection-algorithms
 Deepfake detection algorithm zoo.
 
